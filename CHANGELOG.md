@@ -5,13 +5,26 @@ All notable changes to the NewsBreak Ads MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2025-10-29
+
+### Fixed
+- **CRITICAL**: Removed `timezone` parameter from report request
+  - Official API example doesn't include timezone parameter
+  - Simplified report name format to match API documentation
+  - Request now matches exact format from official docs
+
+### Added
+- Enhanced debug logging to troubleshoot format errors
+- Extended dimension/metric mappings with common aliases
+- Comprehensive debugging guide (DEBUGGING_REPORTS.md)
+
 ## [1.1.2] - 2025-10-29
 
 ### Fixed
 - **CRITICAL**: Updated to use OFFICIAL NewsBreak API format from documentation
   - Now uses UPPERCASE enum values (DATE, CAMPAIGN, COST, IMPRESSION, etc.)
   - Added proper parameter mapping for user-friendly names
-  - Includes all required parameters: timezone, dateRange, filter, filterIds, dataSource
+  - Includes required parameters: dateRange, filter, filterIds, dataSource
   - Uses HOURLY dataSource (official settlement basis)
   - filterIds now correctly passes ad_account_id as integer
   - Added dimension/metric aliases (spend→COST, impressions→IMPRESSION, etc.)
