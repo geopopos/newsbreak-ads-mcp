@@ -156,9 +156,38 @@ class ReportRequest(BaseModel):
 
 
 class ReportRow(BaseModel):
-    """Single row in report data"""
-    dimensions: Optional[dict] = Field(None, description="Dimension values")
-    metrics: Optional[dict] = Field(None, description="Metric values")
+    """Single row in report data - API returns flat structure with dimensions and metrics at same level"""
+    # Dimension fields (optional based on what was requested)
+    date: Optional[str] = Field(None, description="Date (YYYY-MM-DD)")
+    hour: Optional[str] = Field(None, description="Hour")
+    adAccountId: Optional[str] = Field(None, description="Ad account ID")
+    adAccount: Optional[str] = Field(None, description="Ad account name")
+    orgId: Optional[str] = Field(None, description="Organization ID")
+    organization: Optional[str] = Field(None, description="Organization name")
+    campaignId: Optional[str] = Field(None, description="Campaign ID")
+    campaign: Optional[str] = Field(None, description="Campaign name")
+    adSetId: Optional[str] = Field(None, description="Ad set ID")
+    adSet: Optional[str] = Field(None, description="Ad set name")
+    adId: Optional[str] = Field(None, description="Ad ID")
+    ad: Optional[str] = Field(None, description="Ad name")
+
+    # Metric fields (optional based on what was requested)
+    cost: Optional[float] = Field(None, description="Cost/Spend")
+    impression: Optional[int] = Field(None, description="Impressions")
+    click: Optional[int] = Field(None, description="Clicks")
+    conversion: Optional[int] = Field(None, description="Conversions")
+    value: Optional[float] = Field(None, description="Conversion value")
+    cpm: Optional[float] = Field(None, description="Cost per mille (CPM)")
+    cpc: Optional[float] = Field(None, description="Cost per click (CPC)")
+    cpa: Optional[float] = Field(None, description="Cost per acquisition (CPA)")
+    ctr: Optional[float] = Field(None, description="Click-through rate (CTR)")
+    cvr: Optional[float] = Field(None, description="Conversion rate (CVR)")
+    vpa: Optional[float] = Field(None, description="Value per acquisition")
+    roas: Optional[float] = Field(None, description="Return on ad spend (ROAS)")
+
+    # Allow additional fields the API might return
+    class Config:
+        extra = "allow"
 
 
 class ReportData(BaseModel):

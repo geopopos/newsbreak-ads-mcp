@@ -5,6 +5,21 @@ All notable changes to the NewsBreak Ads MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2025-10-29
+
+### Fixed
+- **CRITICAL**: Fixed report response parsing - null dimensions and metrics
+  - API returns flat row structure, not nested dimensions/metrics objects
+  - Updated ReportRow model to match actual API response format
+  - Each row now properly contains dimension fields (date, campaignId, etc.) and metric fields (cost, impression, etc.)
+  - Updated server.py to use model_dump(exclude_none=True) for clean output
+  - Resolves issue where all dimension and metric values showed as null
+
+### Changed
+- ReportRow model now explicitly defines all dimension and metric fields
+- Added Config.extra = "allow" to handle additional API fields
+- Server now excludes null fields from response for cleaner output
+
 ## [1.1.4] - 2025-10-29
 
 ### Added
@@ -17,9 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Investigation
 - Direct Python client tests: ✅ API calls work perfectly
 - Direct curl tests: ✅ API calls work perfectly
-- MCP tool calls through Claude: ❌ Still failing with "illegal format" error
-- **Conclusion**: Issue is NOT with API format or client code
-- **Hypothesis**: Parameter transformation in MCP/FastMCP layer
+- MCP tool calls through Claude: ✅ NOW WORKING! (after debug logging added)
+- **Conclusion**: MCP tool now successfully calling API
+- **Discovery**: Response model was wrong - API returns flat rows, not nested objects
 - See INVESTIGATION_RESULTS.md for full details
 
 ### Testing

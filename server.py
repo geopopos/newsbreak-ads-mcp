@@ -322,10 +322,7 @@ async def run_performance_report(
                     "dimensions": dimensions,
                     "metrics": metrics,
                     "rows": [
-                        {
-                            "dimensions": row.dimensions,
-                            "metrics": row.metrics,
-                        }
+                        row.model_dump(exclude_none=True)  # Convert to dict, exclude null fields
                         for row in response.data.rows
                     ],
                     "total": response.data.total or len(response.data.rows),
