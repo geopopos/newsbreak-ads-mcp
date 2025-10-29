@@ -499,66 +499,85 @@ async def get_ads(
 
             # Format ad data with creative assets
             ads_data = []
-            for ad in response.data.rows:
-                ad_info = {
-                    "id": ad.id,
-                    "name": ad.name,
-                    "ad_account_id": ad.adAccountId,
-                    "campaign_id": ad.campaignId,
-                    "ad_set_id": ad.adSetId,
-                    "status": ad.status,
-                    "audit_status": ad.auditStatus,
-                    "online_status": ad.onlineStatus,
-                    "status_text": ad.statusTxt,
-                }
+            for i, ad in enumerate(response.data.rows):
+                try:
+                    ad_info = {
+                        "id": ad.id,
+                        "name": ad.name,
+                        "ad_account_id": ad.adAccountId,
+                        "campaign_id": ad.campaignId,
+                        "ad_set_id": ad.adSetId,
+                        "status": ad.status,
+                        "audit_status": ad.auditStatus,
+                        "online_status": ad.onlineStatus,
+                        "status_text": ad.statusTxt,
+                    }
+                except Exception as e:
+                    print(f"DEBUG: Error processing ad {i} basic fields: {e}", file=sys.stderr)
+                    import traceback
+                    traceback.print_exc(file=sys.stderr)
+                    continue
 
                 # Add creative assets if available
-                if ad.creative:
-                    creative_info = {
-                        "type": ad.creative.type,  # IMAGE, VIDEO, or GIF
-                    }
+                try:
+                    if ad.creative:
+                        creative_info = {
+                            "type": ad.creative.type,  # IMAGE, VIDEO, or GIF
+                        }
 
-                    if ad.creative.content:
-                        creative_info["content"] = {}
-                        content = ad.creative.content
+                        if ad.creative.content:
+                            creative_info["content"] = {}
+                            content = ad.creative.content
 
-                        # Add all available creative content fields
-                        if content.headline:
-                            creative_info["content"]["headline"] = content.headline
-                        if content.description:
-                            creative_info["content"]["description"] = content.description
-                        if content.callToAction:
-                            creative_info["content"]["call_to_action"] = content.callToAction
-                        if content.assetUrl:
-                            creative_info["content"]["asset_url"] = content.assetUrl
-                        if content.clickThroughUrl:
-                            creative_info["content"]["landing_page_url"] = content.clickThroughUrl
-                        if content.brandName:
-                            creative_info["content"]["brand_name"] = content.brandName
-                        if content.logoUrl:
-                            creative_info["content"]["logo_url"] = content.logoUrl
-                        if content.coverUrl:
-                            creative_info["content"]["video_cover_url"] = content.coverUrl
-                        if content.width:
-                            creative_info["content"]["width"] = content.width
-                        if content.height:
-                            creative_info["content"]["height"] = content.height
+                            # Add all available creative content fields
+                            if content.headline:
+                                creative_info["content"]["headline"] = content.headline
+                            if content.description:
+                                creative_info["content"]["description"] = content.description
+                            if content.callToAction:
+                                creative_info["content"]["call_to_action"] = content.callToAction
+                            if content.assetUrl:
+                                creative_info["content"]["asset_url"] = content.assetUrl
+                            if content.clickThroughUrl:
+                                creative_info["content"]["landing_page_url"] = content.clickThroughUrl
+                            if content.brandName:
+                                creative_info["content"]["brand_name"] = content.brandName
+                            if content.logoUrl:
+                                creative_info["content"]["logo_url"] = content.logoUrl
+                            if content.coverUrl:
+                                creative_info["content"]["video_cover_url"] = content.coverUrl
+                            if content.width:
+                                creative_info["content"]["width"] = content.width
+                            if content.height:
+                                creative_info["content"]["height"] = content.height
 
-                    ad_info["creative"] = creative_info
+                        ad_info["creative"] = creative_info
+                except Exception as e:
+                    print(f"DEBUG: Error processing ad {i} creative: {e}", file=sys.stderr)
 
                 # Add tracking URLs if available
-                if ad.clickTrackingUrl:
-                    ad_info["click_tracking_urls"] = ad.clickTrackingUrl
-                if ad.impressionTrackingUrl:
-                    ad_info["impression_tracking_urls"] = ad.impressionTrackingUrl
+                try:
+                    if ad.clickTrackingUrl:
+                        ad_info["click_tracking_urls"] = ad.clickTrackingUrl
+                    if ad.impressionTrackingUrl:
+                        ad_info["impression_tracking_urls"] = ad.impressionTrackingUrl
+                except Exception as e:
+                    print(f"DEBUG: Error processing ad {i} tracking URLs: {e}", file=sys.stderr)
 
                 # Add timestamps
-                if ad.createTime:
-                    ad_info["created_at"] = ad.createTime
-                if ad.updateTime:
-                    ad_info["updated_at"] = ad.updateTime
+                try:
+                    if ad.createTime:
+                        ad_info["created_at"] = ad.createTime
+                    if ad.updateTime:
+                        ad_info["updated_at"] = ad.updateTime
+                except Exception as e:
+                    print(f"DEBUG: Error processing ad {i} timestamps: {e}", file=sys.stderr)
 
                 ads_data.append(ad_info)
+                print(f"DEBUG: Successfully processed ad {i}: {ad.id}", file=sys.stderr)
+
+            print(f"\nDEBUG: Finished processing loop. ads_data length: {len(ads_data)}", file=sys.stderr)
+            print(f"DEBUG: About to create result JSON...\n", file=sys.stderr)
 
             result = {
                 "ads": {
