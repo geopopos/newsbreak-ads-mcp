@@ -5,6 +5,30 @@ All notable changes to the NewsBreak Ads MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-10-29
+
+### Added
+- **CRITICAL DEBUG**: Enhanced MCP tool parameter logging
+  - Added comprehensive debug logging at MCP tool entry point
+  - Logs exact parameters received from Claude/MCP (values and types)
+  - Helps diagnose parameter transformation issues
+  - Located at server.py lines 270-279
+
+### Investigation
+- Direct Python client tests: ✅ API calls work perfectly
+- Direct curl tests: ✅ API calls work perfectly
+- MCP tool calls through Claude: ❌ Still failing with "illegal format" error
+- **Conclusion**: Issue is NOT with API format or client code
+- **Hypothesis**: Parameter transformation in MCP/FastMCP layer
+- See INVESTIGATION_RESULTS.md for full details
+
+### Testing
+- Created test_api_directly.py to verify client works independently
+- Tested with January dates (2025-01-22 to 2025-01-29): ✅ SUCCESS
+- Tested with October dates (2025-10-22 to 2025-10-29): ✅ SUCCESS
+- Tested with level="campaign" parameter: ✅ SUCCESS
+- All tests return valid data from API
+
 ## [1.1.3] - 2025-10-29
 
 ### Fixed

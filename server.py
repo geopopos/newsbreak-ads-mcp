@@ -266,6 +266,18 @@ async def run_performance_report(
         JSON string with report data
     """
     try:
+        # Debug logging - log exactly what parameters MCP received
+        import sys
+        print(f"\n=== MCP TOOL CALLED: run_performance_report ===", file=sys.stderr)
+        print(f"DEBUG: Received parameters:", file=sys.stderr)
+        print(f"  ad_account_id: {ad_account_id!r} (type: {type(ad_account_id).__name__})", file=sys.stderr)
+        print(f"  date_from: {date_from!r} (type: {type(date_from).__name__})", file=sys.stderr)
+        print(f"  date_to: {date_to!r} (type: {type(date_to).__name__})", file=sys.stderr)
+        print(f"  dimensions: {dimensions!r} (type: {type(dimensions).__name__})", file=sys.stderr)
+        print(f"  metrics: {metrics!r} (type: {type(metrics).__name__})", file=sys.stderr)
+        print(f"  level: {level!r} (type: {type(level).__name__})", file=sys.stderr)
+        print(f"================================================\n", file=sys.stderr)
+
         # Validate date format
         try:
             datetime.strptime(date_from, "%Y-%m-%d")
