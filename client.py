@@ -293,23 +293,68 @@ class NewsBreakClient:
         Returns:
             ReportResponse with report data
         """
-        # Build request in the format NewsBreak API expects
-        request_body = {
-            "name": f"Report_{ad_account_id}_{date_from}_{date_to}",  # Required: report name
-            "adAccountId": ad_account_id,
-            "dateRange": {  # Required: dateRange object (not dateFrom/dateTo)
-                "startDate": date_from,
-                "endDate": date_to,
-            },
-            "dimensions": dimensions or [],  # Required: array of dimensions
-            "metrics": metrics or ["impressions", "clicks", "spend", "ctr", "cpc"],  # Required: array of metrics
+        # Build request in the CORRECT format per NewsBreak API documentation
+        # See: https://business.newsbreak.com/business-api-doc/docs/api-reference/reporting/run-a-synchronous-report
+
+        # Map our parameter names to API's uppercase enum values
+        dimension_map = {
+            "date": "DATE",
+            "hour": "HOUR",
+            "org": "ORG",
+            "ad_account": "AD_ACCOUNT",
+            "campaign": "CAMPAIGN",
+            "ad_set": "AD_SET",
+            "ad": "AD",
         }
 
-        # Add optional parameters
-        if filters:
-            request_body["filters"] = filters
-        if level:
-            request_body["level"] = level
+        metric_map = {
+            "cost": "COST",
+            "spend": "COST",  # Alias
+            "impression": "IMPRESSION",
+            "impressions": "IMPRESSION",  # Alias
+            "click": "CLICK",
+            "clicks": "CLICK",  # Alias
+            "conversion": "CONVERSION",
+            "conversions": "CONVERSION",  # Alias
+            "value": "VALUE",
+            "cpm": "CPM",
+            "cpc": "CPC",
+            "cpa": "CPA",
+            "ctr": "CTR",
+            "cvr": "CVR",
+            "vpa": "VPA",
+        }
+
+        # Convert dimensions to uppercase API format
+        api_dimensions = []
+        if dimensions:
+            for dim in dimensions:
+                api_dimensions.append(dimension_map.get(dim.lower(), dim.upper()))
+        else:
+            # Default dimensions if none provided
+            api_dimensions = ["DATE", "CAMPAIGN"]
+
+        # Convert metrics to uppercase API format
+        api_metrics = []
+        if metrics:
+            for metric in metrics:
+                api_metrics.append(metric_map.get(metric.lower(), metric.upper()))
+        else:
+            # Default metrics if none provided
+            api_metrics = ["COST", "IMPRESSION", "CLICK", "CTR", "CPC"]
+
+        request_body = {
+            "name": f"MCP_Report_{ad_account_id}_{date_from}_{date_to}",
+            "timezone": "America/Los_Angeles",  # Default timezone (can be made configurable)
+            "dateRange": "FIXED",  # Using FIXED range with custom dates
+            "startDate": date_from,  # Format: YYYY-mm-dd
+            "endDate": date_to,  # Format: YYYY-mm-dd
+            "dimensions": api_dimensions,
+            "metrics": api_metrics,
+            "filter": "AD_ACCOUNT",  # Filter by ad account
+            "filterIds": [int(ad_account_id)],  # Ad account ID as integer
+            "dataSource": "HOURLY",  # Official basis for income settlement
+        }
 
         # Use the correct endpoint: /reports/getIntegratedReport (not /report/runSync)
         data = await self._request("POST", "/reports/getIntegratedReport", json=request_body)
