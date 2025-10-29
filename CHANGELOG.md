@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed endpoint from `/report/runSync` to `/reports/getIntegratedReport`
   - The original endpoint URL was incorrect
   - Now uses the correct NewsBreak API reporting endpoint
+- **CRITICAL**: Fixed request format for reports API
+  - Changed `dateFrom`/`dateTo` to `dateRange` object with `startDate`/`endDate`
+  - Added required `name` parameter (auto-generated from account ID and dates)
+  - Made `metrics` and `dimensions` always present (empty arrays if not specified)
+  - Added default metrics: impressions, clicks, spend, ctr, cpc
 
 ## [1.1.0] - 2025-10-29
 
