@@ -132,18 +132,49 @@ class NewsBreakClient:
                     json=json,
                 )
 
+                # Check HTTP status first
+                if response.status_code >= 400:
+                    # Try to parse error response
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get("message") or error_data.get("errMsg") or error_data.get("error") or f"HTTP {response.status_code}"
+                        raise NewsBreakAPIError(
+                            code=response.status_code,
+                            message=error_msg,
+                            response=error_data,
+                        )
+                    except ValueError:
+                        # Not JSON, use status text
+                        raise NewsBreakAPIError(
+                            code=response.status_code,
+                            message=f"HTTP {response.status_code}: {response.text[:200]}",
+                        )
+
                 # Parse response
                 data = response.json()
 
-                # Check for API errors
-                if data.get("code", 0) != 0:
-                    error_msg = data.get("errMsg", "Unknown error")
+                # Check if response has 'code' field (standard NewsBreak format)
+                if "code" in data:
+                    if data["code"] != 0:
+                        error_msg = data.get("errMsg", "Unknown error")
+                        raise NewsBreakAPIError(
+                            code=data["code"],
+                            message=error_msg,
+                            response=data,
+                        )
+                    return data
+
+                # Check for error response without 'code' field
+                # (timestamp + url format usually indicates an error)
+                if "timestamp" in data and "url" in data and "code" not in data:
+                    error_msg = data.get("message") or data.get("error") or "API returned error response"
                     raise NewsBreakAPIError(
-                        code=data["code"],
-                        message=error_msg,
+                        code=response.status_code,
+                        message=f"{error_msg} (timestamp: {data.get('timestamp')})",
                         response=data,
                     )
 
+                # Return data even if no 'code' field (might be valid response)
                 return data
 
             except httpx.HTTPError as e:
@@ -278,7 +309,24 @@ class NewsBreakClient:
             request_body["level"] = level
 
         data = await self._request("POST", "/report/runSync", json=request_body)
-        return ReportResponse(**data)
+
+        # Add debug logging for report responses
+        try:
+            return ReportResponse(**data)
+        except Exception as e:
+            # Log the raw response for debugging
+            import sys
+            import json
+            print(f"DEBUG: Raw API response for /report/runSync:", file=sys.stderr)
+            print(f"DEBUG: {json.dumps(data, indent=2)}", file=sys.stderr)
+            print(f"DEBUG: Validation error: {str(e)}", file=sys.stderr)
+
+            # Re-raise with better context
+            raise NewsBreakAPIError(
+                code=-1,
+                message=f"Failed to parse report response: {str(e)}. Raw response logged to stderr.",
+                response=data,
+            )
 
     # Ad Set Methods
     async def get_ad_sets(

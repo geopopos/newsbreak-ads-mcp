@@ -41,8 +41,12 @@ class MobilePartner(str):
 # Response Models
 class BaseResponse(BaseModel):
     """Base response model for all API calls"""
-    code: int = Field(description="Status code, 0 for success")
+    code: Optional[int] = Field(None, description="Status code, 0 for success (may be missing in some responses)")
     errMsg: Optional[str] = Field(None, description="Error message when code is non-zero")
+    message: Optional[str] = Field(None, description="Alternative error message field")
+    error: Optional[str] = Field(None, description="Another alternative error message field")
+    timestamp: Optional[str] = Field(None, description="Error timestamp (present in error responses)")
+    url: Optional[str] = Field(None, description="Request URL (present in error responses)")
 
 
 class PaginationInfo(BaseModel):
