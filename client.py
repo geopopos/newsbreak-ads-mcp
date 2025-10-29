@@ -308,7 +308,8 @@ class NewsBreakClient:
         if level:
             request_body["level"] = level
 
-        data = await self._request("POST", "/report/runSync", json=request_body)
+        # Use the correct endpoint: /reports/getIntegratedReport (not /report/runSync)
+        data = await self._request("POST", "/reports/getIntegratedReport", json=request_body)
 
         # Add debug logging for report responses
         try:
@@ -317,7 +318,7 @@ class NewsBreakClient:
             # Log the raw response for debugging
             import sys
             import json
-            print(f"DEBUG: Raw API response for /report/runSync:", file=sys.stderr)
+            print(f"DEBUG: Raw API response for /reports/getIntegratedReport:", file=sys.stderr)
             print(f"DEBUG: {json.dumps(data, indent=2)}", file=sys.stderr)
             print(f"DEBUG: Validation error: {str(e)}", file=sys.stderr)
 
