@@ -5,6 +5,14 @@ All notable changes to the NewsBreak Ads MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-10-29
+
+### Fixed
+- **CRITICAL**: Fixed 404 error in `run_performance_report`
+  - Changed endpoint from `/report/runSync` to `/reports/getIntegratedReport`
+  - The original endpoint URL was incorrect
+  - Now uses the correct NewsBreak API reporting endpoint
+
 ## [1.1.0] - 2025-10-29
 
 ### Added
