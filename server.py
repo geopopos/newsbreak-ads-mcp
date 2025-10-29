@@ -499,7 +499,7 @@ async def get_ads(
 
             # Format ad data with creative assets
             ads_data = []
-            for ad in response.data.rows:
+            for ad in response.data.list:
                 ad_info = {
                     "id": ad.id,
                     "name": ad.name,
