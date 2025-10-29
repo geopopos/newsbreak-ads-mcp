@@ -462,6 +462,24 @@ async def get_ads(
             if response.code != 0:
                 raise ToolError(f"API error: {response.errMsg}")
 
+            # Debug logging - log what we received from the API
+            import sys
+            print(f"\n=== DEBUG: get_ads MCP Tool ===", file=sys.stderr)
+            print(f"DEBUG: Response code: {response.code}", file=sys.stderr)
+            print(f"DEBUG: Has data: {response.data is not None}", file=sys.stderr)
+            if response.data:
+                print(f"DEBUG: Data rows count: {len(response.data.rows)}", file=sys.stderr)
+                print(f"DEBUG: Data total: {response.data.total}", file=sys.stderr)
+                print(f"DEBUG: Data pageNo: {response.data.pageNo}", file=sys.stderr)
+                print(f"DEBUG: Data pageSize: {response.data.pageSize}", file=sys.stderr)
+                print(f"DEBUG: Data hasNext: {response.data.hasNext}", file=sys.stderr)
+                if response.data.rows:
+                    first_ad = response.data.rows[0]
+                    print(f"DEBUG: First ad id: {first_ad.id}", file=sys.stderr)
+                    print(f"DEBUG: First ad name: {first_ad.name}", file=sys.stderr)
+                    print(f"DEBUG: First ad has creative: {first_ad.creative is not None}", file=sys.stderr)
+            print(f"===============================\n", file=sys.stderr)
+
             if not response.data:
                 return json.dumps(
                     {

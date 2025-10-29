@@ -461,4 +461,19 @@ class NewsBreakClient:
             params["adSetIds"] = ad_set_ids
 
         data = await self._request("GET", "/ad/getList", params=params)
+
+        # Debug logging - log the raw API response
+        import sys
+        import json
+        print(f"\n=== DEBUG: get_ads API Response ===", file=sys.stderr)
+        print(f"DEBUG: Response code: {data.get('code')}", file=sys.stderr)
+        print(f"DEBUG: Has data field: {'data' in data}", file=sys.stderr)
+        if 'data' in data and data['data']:
+            print(f"DEBUG: Data keys: {list(data['data'].keys())}", file=sys.stderr)
+            print(f"DEBUG: Total ads: {data['data'].get('total', 0)}", file=sys.stderr)
+            print(f"DEBUG: Rows count: {len(data['data'].get('rows', []))}", file=sys.stderr)
+            if data['data'].get('rows'):
+                print(f"DEBUG: First row sample: {json.dumps(data['data']['rows'][0], indent=2)[:500]}", file=sys.stderr)
+        print(f"===================================\n", file=sys.stderr)
+
         return AdsResponse(**data)
