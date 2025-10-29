@@ -407,6 +407,162 @@ async def get_campaign_summary(
         raise ToolError(f"Unexpected error: {str(e)}")
 
 
+@mcp.tool()
+async def get_ads(
+    ad_account_id: str,
+    page_no: int = 1,
+    page_size: int = 50,
+    search: Optional[str] = None,
+    online_status: Optional[str] = None,
+    campaign_ids: Optional[List[str]] = None,
+    ad_set_ids: Optional[List[str]] = None,
+) -> str:
+    """
+    Get ads with complete creative asset details including images, videos, headlines, descriptions, and CTAs.
+
+    This retrieves all ad information including the creative content (headlines, descriptions,
+    call-to-action buttons, images/videos, landing page URLs, etc.) that users see.
+
+    Args:
+        ad_account_id: The ad account ID to retrieve ads from
+        page_no: Page number for pagination (default: 1)
+        page_size: Number of results per page - valid values: 5, 10, 20, 50, 100, 200, 500 (default: 50)
+        search: Optional search query to filter ads by name
+        online_status: Optional status filter - values: WARNING, INACTIVE, ACTIVE, DELETED, PENDING, REJECTED
+        campaign_ids: Optional list of campaign IDs to filter by specific campaigns
+        ad_set_ids: Optional list of ad set IDs to filter by specific ad sets
+
+    Returns:
+        JSON string with ad details including:
+        - Basic info: id, name, status, audit status
+        - Creative assets: type (IMAGE/VIDEO/GIF), headline, description, CTA button text
+        - URLs: landing page (clickThroughUrl), creative asset URL (image/video), brand logo
+        - Tracking: click and impression tracking URLs
+        - Pagination: page info, total count, hasNext flag
+
+    Example:
+        Get all active ads for an account:
+        get_ads(ad_account_id="123456", online_status="ACTIVE")
+
+        Get ads for specific campaigns:
+        get_ads(ad_account_id="123456", campaign_ids=["789", "790"])
+    """
+    try:
+        async with get_client() as client:
+            response = await client.get_ads(
+                ad_account_id=ad_account_id,
+                page_no=page_no,
+                page_size=page_size,
+                search=search,
+                online_status=online_status,
+                campaign_ids=campaign_ids,
+                ad_set_ids=ad_set_ids,
+            )
+
+            if response.code != 0:
+                raise ToolError(f"API error: {response.errMsg}")
+
+            if not response.data:
+                return json.dumps(
+                    {
+                        "ads": {
+                            "ad_account_id": ad_account_id,
+                            "rows": [],
+                            "pagination": {
+                                "page_no": page_no,
+                                "page_size": page_size,
+                                "total": 0,
+                                "has_next": False,
+                            },
+                        }
+                    },
+                    indent=2,
+                )
+
+            # Format ad data with creative assets
+            ads_data = []
+            for ad in response.data.rows:
+                ad_info = {
+                    "id": ad.id,
+                    "name": ad.name,
+                    "ad_account_id": ad.adAccountId,
+                    "campaign_id": ad.campaignId,
+                    "ad_set_id": ad.adSetId,
+                    "status": ad.status,
+                    "audit_status": ad.auditStatus,
+                    "online_status": ad.onlineStatus,
+                    "status_text": ad.statusTxt,
+                }
+
+                # Add creative assets if available
+                if ad.creative:
+                    creative_info = {
+                        "type": ad.creative.type,  # IMAGE, VIDEO, or GIF
+                    }
+
+                    if ad.creative.content:
+                        creative_info["content"] = {}
+                        content = ad.creative.content
+
+                        # Add all available creative content fields
+                        if content.headline:
+                            creative_info["content"]["headline"] = content.headline
+                        if content.description:
+                            creative_info["content"]["description"] = content.description
+                        if content.callToAction:
+                            creative_info["content"]["call_to_action"] = content.callToAction
+                        if content.assetUrl:
+                            creative_info["content"]["asset_url"] = content.assetUrl
+                        if content.clickThroughUrl:
+                            creative_info["content"]["landing_page_url"] = content.clickThroughUrl
+                        if content.brandName:
+                            creative_info["content"]["brand_name"] = content.brandName
+                        if content.logoUrl:
+                            creative_info["content"]["logo_url"] = content.logoUrl
+                        if content.coverUrl:
+                            creative_info["content"]["video_cover_url"] = content.coverUrl
+                        if content.width:
+                            creative_info["content"]["width"] = content.width
+                        if content.height:
+                            creative_info["content"]["height"] = content.height
+
+                    ad_info["creative"] = creative_info
+
+                # Add tracking URLs if available
+                if ad.clickTrackingUrl:
+                    ad_info["click_tracking_urls"] = ad.clickTrackingUrl
+                if ad.impressionTrackingUrl:
+                    ad_info["impression_tracking_urls"] = ad.impressionTrackingUrl
+
+                # Add timestamps
+                if ad.createTime:
+                    ad_info["created_at"] = ad.createTime
+                if ad.updateTime:
+                    ad_info["updated_at"] = ad.updateTime
+
+                ads_data.append(ad_info)
+
+            result = {
+                "ads": {
+                    "ad_account_id": ad_account_id,
+                    "rows": ads_data,
+                    "pagination": {
+                        "page_no": response.data.pageNo,
+                        "page_size": response.data.pageSize,
+                        "total": response.data.total,
+                        "has_next": response.data.hasNext,
+                    },
+                }
+            }
+
+            return json.dumps(result, indent=2)
+
+    except NewsBreakAPIError as e:
+        raise ToolError(f"NewsBreak API error: {e.message}")
+    except Exception as e:
+        raise ToolError(f"Unexpected error: {str(e)}")
+
+
 # =============================================================================
 # RESOURCES - Read-only data access
 # =============================================================================

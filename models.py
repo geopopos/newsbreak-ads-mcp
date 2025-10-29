@@ -228,24 +228,53 @@ class AdSetsResponse(BaseResponse):
 
 
 # Ad Models
+class AdCreativeContent(BaseModel):
+    """Ad creative content details"""
+    headline: Optional[str] = Field(None, description="Ad headline/title")
+    assetUrl: Optional[str] = Field(None, description="Creative asset URL (image/video)")
+    height: Optional[int] = Field(None, description="Asset height (for videos)")
+    width: Optional[int] = Field(None, description="Asset width (for videos)")
+    coverUrl: Optional[str] = Field(None, description="Video cover/thumbnail URL")
+    description: Optional[str] = Field(None, description="Ad description/body text")
+    callToAction: Optional[str] = Field(None, description="Call-to-action button text")
+    brandName: Optional[str] = Field(None, description="Brand name")
+    logoUrl: Optional[str] = Field(None, description="Brand logo URL")
+    clickThroughUrl: Optional[str] = Field(None, description="Landing page URL")
+
+
+class AdCreative(BaseModel):
+    """Ad creative information"""
+    type: Optional[str] = Field(None, description="Creative type: IMAGE, VIDEO, or GIF")
+    content: Optional[AdCreativeContent] = Field(None, description="Creative content details")
+    createTime: Optional[str] = Field(None, description="Creative creation time")
+    updateTime: Optional[str] = Field(None, description="Creative update time")
+
+
 class Ad(BaseModel):
-    """Ad information"""
+    """Ad information with complete creative assets"""
     id: str = Field(description="Ad ID")
     name: str = Field(description="Ad name")
+    adAccountId: Optional[str] = Field(None, description="Parent ad account ID")
+    campaignId: Optional[str] = Field(None, description="Parent campaign ID")
     adSetId: str = Field(description="Parent ad set ID")
-    status: Optional[str] = Field(None, description="Ad status")
-    creativeType: Optional[str] = Field(None, description="Creative type")
-    createTime: Optional[int] = Field(None, description="Creation timestamp")
-    updateTime: Optional[int] = Field(None, description="Update timestamp")
+    clickTrackingUrl: Optional[List[str]] = Field(None, description="Click tracking URLs")
+    impressionTrackingUrl: Optional[List[str]] = Field(None, description="Impression tracking URLs")
+    status: Optional[str] = Field(None, description="Ad status (ON/OFF)")
+    auditStatus: Optional[str] = Field(None, description="Audit status (PENDING/APPROVED/REJECTED)")
+    onlineStatus: Optional[str] = Field(None, description="Online status (PENDING/REJECTED/ACTIVE/INACTIVE/WARNING/DELETED)")
+    statusTxt: Optional[str] = Field(None, description="Status description text")
+    creative: Optional[AdCreative] = Field(None, description="Creative assets and content")
+    createTime: Optional[str] = Field(None, description="Creation timestamp")
+    updateTime: Optional[str] = Field(None, description="Update timestamp")
 
 
 class AdsData(BaseModel):
     """Ads list with pagination"""
-    list: List[Ad] = Field(default_factory=list)
-    pageNo: int
-    pageSize: int
-    total: int
-    hasNext: bool
+    rows: List[Ad] = Field(default_factory=list, description="List of ads")
+    pageNo: int = Field(description="Current page number")
+    pageSize: int = Field(description="Page size")
+    total: int = Field(description="Total number of ads")
+    hasNext: bool = Field(description="Whether there are more pages")
 
 
 class AdsResponse(BaseResponse):

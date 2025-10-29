@@ -5,6 +5,55 @@ All notable changes to the NewsBreak Ads MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-10-29
+
+### Added
+- **NEW TOOL**: `get_ads()` - Retrieve ads with complete creative asset details
+  - Get headlines, descriptions, call-to-action buttons
+  - Access creative assets: images, videos, GIFs with URLs
+  - Retrieve landing page URLs (clickThroughUrl)
+  - View brand information: brand name, logo URL
+  - Access tracking URLs for clicks and impressions
+  - Filter by status, campaigns, ad sets, or search query
+  - Full pagination support
+
+### Changed
+- **BREAKING**: Updated `get_ads()` client method signature
+  - Changed from `ad_set_id` parameter to `ad_account_id` (matches API requirements)
+  - Added optional filters: search, online_status, campaign_ids, ad_set_ids
+  - Now returns complete creative asset information
+- Updated `Ad` model with all creative asset fields
+  - Added `AdCreativeContent` model (headline, description, assetUrl, callToAction, etc.)
+  - Added `AdCreative` model (type, content, timestamps)
+  - Added missing fields: adAccountId, campaignId, tracking URLs, audit status
+- Updated `AdsData` model to use `rows` instead of `list` (matches API response)
+
+### Creative Asset Fields Available
+**Dimensions:**
+- headline - Ad headline/title text
+- description - Ad body/description text
+- callToAction - CTA button text (e.g., "Learn More", "Shop Now")
+
+**URLs:**
+- clickThroughUrl - Landing page URL where users are directed
+- assetUrl - Creative asset URL (image/video file)
+- logoUrl - Brand logo image URL
+- coverUrl - Video thumbnail/cover image URL
+
+**Brand Info:**
+- brandName - Advertiser's brand name
+- type - Creative type (IMAGE, VIDEO, or GIF)
+- width/height - Asset dimensions (for videos)
+
+**Tracking:**
+- clickTrackingUrl - Array of click tracking pixel URLs
+- impressionTrackingUrl - Array of impression tracking pixel URLs
+
+**Status:**
+- status - Ad on/off status
+- auditStatus - PENDING, APPROVED, or REJECTED
+- onlineStatus - ACTIVE, INACTIVE, WARNING, DELETED, PENDING, or REJECTED
+
 ## [1.1.5] - 2025-10-29
 
 ### Fixed

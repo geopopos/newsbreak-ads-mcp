@@ -421,26 +421,44 @@ class NewsBreakClient:
     # Ad Methods
     async def get_ads(
         self,
-        ad_set_id: str,
+        ad_account_id: str,
         page_no: int = 1,
         page_size: int = 50,
+        search: Optional[str] = None,
+        online_status: Optional[str] = None,
+        campaign_ids: Optional[List[str]] = None,
+        ad_set_ids: Optional[List[str]] = None,
     ) -> AdsResponse:
         """
-        Get ads for an ad set
+        Get ads for an ad account with full creative asset details
 
         Args:
-            ad_set_id: Ad set ID
+            ad_account_id: Ad account ID (required)
             page_no: Page number (1-indexed)
-            page_size: Results per page
+            page_size: Results per page (5, 10, 20, 50, 100, 200, 500)
+            search: Search query to filter ads
+            online_status: Filter by status (WARNING, INACTIVE, ACTIVE, DELETED, PENDING, REJECTED)
+            campaign_ids: Filter by specific campaign IDs
+            ad_set_ids: Filter by specific ad set IDs
 
         Returns:
-            AdsResponse with ad list and pagination
+            AdsResponse with complete ad details including creative assets (headlines, images,
+            descriptions, CTAs, landing page URLs, etc.) and pagination info
         """
         params = {
-            "adSetId": ad_set_id,
+            "adAccountId": ad_account_id,
             "pageNo": page_no,
             "pageSize": page_size,
         }
+
+        if search:
+            params["search"] = search
+        if online_status:
+            params["onlineStatus"] = online_status
+        if campaign_ids:
+            params["campaignIds"] = campaign_ids
+        if ad_set_ids:
+            params["adSetIds"] = ad_set_ids
 
         data = await self._request("GET", "/ad/getList", params=params)
         return AdsResponse(**data)
