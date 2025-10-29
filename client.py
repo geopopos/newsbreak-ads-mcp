@@ -293,16 +293,19 @@ class NewsBreakClient:
         Returns:
             ReportResponse with report data
         """
+        # Build request in the format NewsBreak API expects
         request_body = {
+            "name": f"Report_{ad_account_id}_{date_from}_{date_to}",  # Required: report name
             "adAccountId": ad_account_id,
-            "dateFrom": date_from,
-            "dateTo": date_to,
+            "dateRange": {  # Required: dateRange object (not dateFrom/dateTo)
+                "startDate": date_from,
+                "endDate": date_to,
+            },
+            "dimensions": dimensions or [],  # Required: array of dimensions
+            "metrics": metrics or ["impressions", "clicks", "spend", "ctr", "cpc"],  # Required: array of metrics
         }
 
-        if dimensions:
-            request_body["dimensions"] = dimensions
-        if metrics:
-            request_body["metrics"] = metrics
+        # Add optional parameters
         if filters:
             request_body["filters"] = filters
         if level:
