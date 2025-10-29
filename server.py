@@ -4,7 +4,9 @@ A Model Context Protocol server for NewsBreak Business API
 Focus: Analytics and Reporting
 """
 import os
+import sys
 import json
+import argparse
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -23,6 +25,9 @@ from models import (
 # Load environment variables
 load_dotenv()
 
+# Global variable to store access token
+_ACCESS_TOKEN: Optional[str] = None
+
 # Initialize FastMCP server
 mcp = FastMCP(
     name="newsbreak-ads-mcp",
@@ -34,13 +39,21 @@ mcp = FastMCP(
 )
 
 
+def set_access_token(token: str):
+    """Set the access token for API calls"""
+    global _ACCESS_TOKEN
+    _ACCESS_TOKEN = token
+
+
 def get_client() -> NewsBreakClient:
     """Get configured NewsBreak API client"""
-    access_token = os.getenv("NEWSBREAK_ACCESS_TOKEN")
+    # Priority order: global token > environment variable
+    access_token = _ACCESS_TOKEN or os.getenv("NEWSBREAK_ACCESS_TOKEN")
+
     if not access_token:
         raise ToolError(
-            "NEWSBREAK_ACCESS_TOKEN environment variable not set. "
-            "Please set your NewsBreak access token."
+            "NewsBreak access token not configured. "
+            "Please provide via --token argument or NEWSBREAK_ACCESS_TOKEN environment variable."
         )
     return NewsBreakClient(access_token=access_token)
 
@@ -510,6 +523,97 @@ async def get_tracking_events_resource(ad_account_id: str) -> str:
 # =============================================================================
 
 
+def main():
+    """Main entry point with command-line argument parsing"""
+    parser = argparse.ArgumentParser(
+        description="NewsBreak Ads MCP Server - Analytics and Reporting",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Use environment variable (from .env file)
+  python server.py
+
+  # Provide token via command line
+  python server.py --token YOUR_ACCESS_TOKEN
+
+  # Specify custom transport
+  python server.py --token YOUR_TOKEN --transport http --port 8000
+
+Environment Variables:
+  NEWSBREAK_ACCESS_TOKEN    NewsBreak API access token
+
+For more information, see README.md or visit:
+https://business.newsbreak.com/business-api-doc/
+        """,
+    )
+
+    parser.add_argument(
+        "--token",
+        type=str,
+        help="NewsBreak API access token (overrides NEWSBREAK_ACCESS_TOKEN env var)",
+    )
+
+    parser.add_argument(
+        "--transport",
+        type=str,
+        choices=["stdio", "http", "sse"],
+        default="stdio",
+        help="Transport method (default: stdio)",
+    )
+
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="localhost",
+        help="Host for HTTP/SSE transport (default: localhost)",
+    )
+
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port for HTTP/SSE transport (default: 8000)",
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 1.0.0",
+    )
+
+    args = parser.parse_args()
+
+    # Set access token if provided via command line
+    if args.token:
+        set_access_token(args.token)
+        print(f"✓ Using access token from command line", file=sys.stderr)
+    elif os.getenv("NEWSBREAK_ACCESS_TOKEN"):
+        print(f"✓ Using access token from environment variable", file=sys.stderr)
+    else:
+        print(
+            "ERROR: No access token provided. "
+            "Use --token argument or set NEWSBREAK_ACCESS_TOKEN environment variable.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Run the server with specified transport
+    if args.transport == "stdio":
+        print(f"✓ Starting MCP server (STDIO transport)...", file=sys.stderr)
+        mcp.run(transport="stdio")
+    elif args.transport == "http":
+        print(
+            f"✓ Starting MCP server (HTTP transport) on http://{args.host}:{args.port}/mcp",
+            file=sys.stderr,
+        )
+        mcp.run(transport="http", host=args.host, port=args.port)
+    elif args.transport == "sse":
+        print(
+            f"✓ Starting MCP server (SSE transport) on http://{args.host}:{args.port}",
+            file=sys.stderr,
+        )
+        mcp.run(transport="sse", host=args.host, port=args.port)
+
+
 if __name__ == "__main__":
-    # Run the server
-    mcp.run()
+    main()

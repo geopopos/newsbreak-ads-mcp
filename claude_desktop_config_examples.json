@@ -1,0 +1,41 @@
+{
+  "// Example 1: Pass token via command line argument (RECOMMENDED)": "",
+  "mcpServers_example1": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/path/to/newsbreak-ads-mcp-server/server.py",
+        "--token",
+        "your_access_token_here"
+      ]
+    }
+  },
+
+  "// Example 2: Use environment variable": "",
+  "mcpServers_example2": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/path/to/newsbreak-ads-mcp-server/server.py"
+      ],
+      "env": {
+        "NEWSBREAK_ACCESS_TOKEN": "your_access_token_here"
+      }
+    }
+  },
+
+  "// Example 3: Use .env file (no token in config)": "",
+  "mcpServers_example3": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/path/to/newsbreak-ads-mcp-server/server.py"
+      ],
+      "env": {}
+    }
+  },
+
+  "// Note: Only use ONE of the above examples in your actual config": "",
+  "// Remove the '_example1', '_example2', etc. suffixes": "",
+  "// Keep only 'mcpServers' as the key": ""
+}

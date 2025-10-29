@@ -3,11 +3,10 @@
     "newsbreak-ads": {
       "command": "python",
       "args": [
-        "/Users/georgiosroros/mcps/newsbreak-ads-mcp-server/server.py"
-      ],
-      "env": {
-        "NEWSBREAK_ACCESS_TOKEN": "your_access_token_here"
-      }
+        "/Users/georgiosroros/mcps/newsbreak-ads-mcp-server/server.py",
+        "--token",
+        "your_access_token_here"
+      ]
     }
   }
 }

@@ -63,25 +63,62 @@ NEWSBREAK_ACCESS_TOKEN=your_access_token_here
 
 ## Usage
 
-### Option 1: Local Development (STDIO)
+The server supports multiple authentication methods and transport options.
 
-Run the server locally for development:
+### Command-Line Options
 
 ```bash
-# Using the run script
-./run_server.sh
+python server.py --help
 
-# Or directly with Python
+Options:
+  --token TOKEN        NewsBreak API access token (overrides environment variable)
+  --transport {stdio,http,sse}
+                       Transport method (default: stdio)
+  --host HOST         Host for HTTP/SSE transport (default: localhost)
+  --port PORT         Port for HTTP/SSE transport (default: 8000)
+  --version           Show version and exit
+```
+
+### Option 1: Local Development (STDIO)
+
+**Method 1A: Using command-line argument (RECOMMENDED)**
+```bash
+python server.py --token YOUR_ACCESS_TOKEN
+```
+
+**Method 1B: Using environment variable**
+```bash
+# Ensure .env file has NEWSBREAK_ACCESS_TOKEN set
 python server.py
+```
+
+**Method 1C: Using the run script**
+```bash
+./run_server.sh
 ```
 
 ### Option 2: Claude Desktop Integration
 
-Add this configuration to your Claude Desktop config file:
-
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
+**Method 2A: Pass token via command-line argument (RECOMMENDED - more secure)**
+```json
+{
+  "mcpServers": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/path/to/newsbreak-ads-mcp-server/server.py",
+        "--token",
+        "your_access_token_here"
+      ]
+    }
+  }
+}
+```
+
+**Method 2B: Pass token via environment variable**
 ```json
 {
   "mcpServers": {
@@ -98,6 +135,21 @@ Add this configuration to your Claude Desktop config file:
 }
 ```
 
+**Method 2C: Use .env file (most secure - no token in config)**
+```json
+{
+  "mcpServers": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/path/to/newsbreak-ads-mcp-server/server.py"
+      ]
+    }
+  }
+}
+```
+Note: Requires `.env` file with `NEWSBREAK_ACCESS_TOKEN` in the project directory
+
 Restart Claude Desktop after updating the configuration.
 
 ### Option 3: HTTP Server
@@ -105,14 +157,24 @@ Restart Claude Desktop after updating the configuration.
 Run as an HTTP server for remote access:
 
 ```bash
+# Using command-line token
+python server.py --token YOUR_TOKEN --transport http --port 8000
+
+# Or using environment variable
+python server.py --transport http --port 8000 --host 0.0.0.0
+
+# Or using fastmcp CLI
 fastmcp run server.py --transport http --port 8000
 ```
+
+Server will be available at: `http://localhost:8000/mcp`
 
 ### Option 4: FastMCP Cloud
 
 Deploy to FastMCP Cloud for instant HTTPS endpoints:
 
 ```bash
+# Make sure to set NEWSBREAK_ACCESS_TOKEN in cloud environment
 fastmcp deploy --config fastmcp_cloud.json
 ```
 

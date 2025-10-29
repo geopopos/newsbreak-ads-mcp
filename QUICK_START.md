@@ -17,29 +17,28 @@ cd newsbreak-ads-mcp-server
 pip install -r requirements.txt
 ```
 
-### 2. Configure Access Token
+### 2. Get Your Access Token
 
-Create a `.env` file:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your token:
-
-```
-NEWSBREAK_ACCESS_TOKEN=your_actual_token_here
-```
+You'll need your NewsBreak access token. See "Getting Your NewsBreak Access Token" section below.
 
 ### 3. Test the Server
 
-Run locally to verify setup:
-
+**Option A: Pass token via command line (EASIEST)**
 ```bash
+python server.py --token YOUR_ACCESS_TOKEN
+```
+
+**Option B: Use environment variable**
+```bash
+# First create .env file
+cp .env.example .env
+# Edit .env and add: NEWSBREAK_ACCESS_TOKEN=your_token_here
+
+# Then run
 python server.py
 ```
 
-You should see the server start without errors.
+You should see: `✓ Using access token from...` and `✓ Starting MCP server...`
 
 ## Using with Claude Desktop
 
@@ -47,8 +46,25 @@ You should see the server start without errors.
 
 1. Open: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-2. Add this configuration:
+2. **Choose ONE of these configurations:**
 
+**Option A: Pass token in args (RECOMMENDED)**
+```json
+{
+  "mcpServers": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/Users/YOUR_USERNAME/mcps/newsbreak-ads-mcp-server/server.py",
+        "--token",
+        "your_access_token_here"
+      ]
+    }
+  }
+}
+```
+
+**Option B: Use environment variable**
 ```json
 {
   "mcpServers": {
@@ -65,7 +81,22 @@ You should see the server start without errors.
 }
 ```
 
-3. **Important**: Replace `/Users/YOUR_USERNAME/mcps/newsbreak-ads-mcp-server/server.py` with your actual path
+**Option C: Use .env file (most secure)**
+```json
+{
+  "mcpServers": {
+    "newsbreak-ads": {
+      "command": "python",
+      "args": [
+        "/Users/YOUR_USERNAME/mcps/newsbreak-ads-mcp-server/server.py"
+      ]
+    }
+  }
+}
+```
+Note: Requires `.env` file with token
+
+3. **Important**: Replace `/Users/YOUR_USERNAME/...` with your actual path
 
 4. Restart Claude Desktop
 
