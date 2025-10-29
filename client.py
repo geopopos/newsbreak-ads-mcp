@@ -348,17 +348,17 @@ class NewsBreakClient:
             # Default metrics if none provided
             api_metrics = ["COST", "IMPRESSION", "CLICK", "CTR", "CPC"]
 
+        # Build request matching the exact format from API documentation
         request_body = {
-            "name": f"MCP_Report_{ad_account_id}_{date_from}_{date_to}",
-            "timezone": "America/Los_Angeles",  # Default timezone (can be made configurable)
-            "dateRange": "FIXED",  # Using FIXED range with custom dates
-            "startDate": date_from,  # Format: YYYY-mm-dd (e.g., 2025-01-20)
-            "endDate": date_to,  # Format: YYYY-mm-dd
+            "name": f"report_{date_from}_{date_to}",  # Simplified name
+            "dateRange": "FIXED",
+            "startDate": date_from,
+            "endDate": date_to,
             "dimensions": api_dimensions,
             "metrics": api_metrics,
-            "filter": "AD_ACCOUNT",  # Filter by ad account
-            "filterIds": [int(ad_account_id)],  # Ad account ID as integer
-            "dataSource": "HOURLY",  # Official basis for income settlement
+            "filter": "AD_ACCOUNT",
+            "filterIds": [int(ad_account_id)],
+            "dataSource": "HOURLY",
         }
 
         # Debug logging - log the request we're about to send
