@@ -301,10 +301,15 @@ class NewsBreakClient:
             "date": "DATE",
             "hour": "HOUR",
             "org": "ORG",
+            "organization": "ORG",
             "ad_account": "AD_ACCOUNT",
+            "ad_account_id": "AD_ACCOUNT",
             "campaign": "CAMPAIGN",
+            "campaign_id": "CAMPAIGN",  # Common alias
             "ad_set": "AD_SET",
+            "ad_set_id": "AD_SET",  # Common alias
             "ad": "AD",
+            "ad_id": "AD",  # Common alias
         }
 
         metric_map = {
@@ -347,7 +352,7 @@ class NewsBreakClient:
             "name": f"MCP_Report_{ad_account_id}_{date_from}_{date_to}",
             "timezone": "America/Los_Angeles",  # Default timezone (can be made configurable)
             "dateRange": "FIXED",  # Using FIXED range with custom dates
-            "startDate": date_from,  # Format: YYYY-mm-dd
+            "startDate": date_from,  # Format: YYYY-mm-dd (e.g., 2025-01-20)
             "endDate": date_to,  # Format: YYYY-mm-dd
             "dimensions": api_dimensions,
             "metrics": api_metrics,
@@ -355,6 +360,15 @@ class NewsBreakClient:
             "filterIds": [int(ad_account_id)],  # Ad account ID as integer
             "dataSource": "HOURLY",  # Official basis for income settlement
         }
+
+        # Debug logging - log the request we're about to send
+        import sys
+        import json
+        print(f"\nDEBUG: Sending report request:", file=sys.stderr)
+        print(f"DEBUG: Request body: {json.dumps(request_body, indent=2)}", file=sys.stderr)
+        print(f"DEBUG: Original params - date_from: {date_from}, date_to: {date_to}", file=sys.stderr)
+        print(f"DEBUG: Original dimensions: {dimensions}, metrics: {metrics}", file=sys.stderr)
+        print(f"DEBUG: Mapped dimensions: {api_dimensions}, metrics: {api_metrics}\n", file=sys.stderr)
 
         # Use the correct endpoint: /reports/getIntegratedReport (not /report/runSync)
         data = await self._request("POST", "/reports/getIntegratedReport", json=request_body)
