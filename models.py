@@ -270,11 +270,16 @@ class Ad(BaseModel):
 
 class AdsData(BaseModel):
     """Ads list with pagination"""
-    rows: List[Ad] = Field(default_factory=list, description="List of ads")
+    list: List[Ad] = Field(default_factory=list, description="List of ads", alias="list")
     pageNo: int = Field(description="Current page number")
     pageSize: int = Field(description="Page size")
     total: int = Field(description="Total number of ads")
     hasNext: bool = Field(description="Whether there are more pages")
+
+    @property
+    def rows(self) -> List[Ad]:
+        """Alias for backward compatibility - return list as rows"""
+        return self.list
 
 
 class AdsResponse(BaseResponse):
