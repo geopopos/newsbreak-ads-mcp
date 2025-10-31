@@ -58,6 +58,30 @@ def get_client() -> NewsBreakClient:
     return NewsBreakClient(access_token=access_token)
 
 
+def convert_cents_to_dollars(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert currency values from cents to dollars in NewsBreak API response data.
+
+    NewsBreak API returns monetary values in cents. This function converts them to dollars
+    by dividing by 100 for better readability.
+
+    Currency fields that get converted:
+    - cost, spend (total cost)
+    - cpm (cost per mille/thousand impressions)
+    - cpc (cost per click)
+    - cpa (cost per acquisition/conversion)
+    """
+    # Fields that contain currency values in cents
+    currency_fields = ['cost', 'spend', 'cpm', 'cpc', 'cpa']
+
+    converted = data.copy()
+    for field in currency_fields:
+        if field in converted and converted[field] is not None:
+            converted[field] = round(converted[field] / 100, 2)
+
+    return converted
+
+
 # =============================================================================
 # TOOLS - Analytics & Reporting (Priority)
 # =============================================================================
@@ -322,7 +346,7 @@ async def run_performance_report(
                     "dimensions": dimensions,
                     "metrics": metrics,
                     "rows": [
-                        row.model_dump(exclude_none=True)  # Convert to dict, exclude null fields
+                        convert_cents_to_dollars(row.model_dump(exclude_none=True))  # Convert to dict, exclude null fields, convert cents to dollars
                         for row in response.data.rows
                     ],
                     "total": response.data.total or len(response.data.rows),
